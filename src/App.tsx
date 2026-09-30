@@ -6,7 +6,7 @@ import { AppStateProvider, useAppState } from './state/AppState';
 import { REGIONS } from './types';
 
 function Header() {
-  const { region, setRegion, saved, source } = useAppState();
+  const { region, setRegion, saved, source, theme, setTheme } = useAppState();
   return (
     <header className="header">
       <div className="header-inner">
@@ -36,6 +36,15 @@ function Header() {
             </button>
           ))}
         </div>
+        <button
+          type="button"
+          className="theme-toggle"
+          aria-label={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
+          title={theme === 'light' ? 'Dark theme' : 'Light theme'}
+          onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+        >
+          {theme === 'light' ? '☾' : '☀'}
+        </button>
       </div>
       {source.kind === 'demo' && (
         <div className="demo-banner">

@@ -5,7 +5,10 @@ import type { DataSource, Region, SavedShow, Show } from '../types';
 
 const STORAGE_KEY = 'whats-on:v1';
 
+export type Theme = 'light' | 'dark';
+
 interface Persisted {
+  theme: Theme;
   region: Region;
   saved: SavedShow[];
   apiKey: string;
@@ -13,12 +16,13 @@ interface Persisted {
 
 function load(): Persisted {
   const envKey = (import.meta.env.VITE_TMDB_API_KEY as string | undefined) ?? '';
-  const fallback: Persisted = { region: 'CA', saved: [], apiKey: envKey };
+  const fallback: Persisted = { theme: 'light', region: 'CA', saved: [], apiKey: envKey };
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return fallback;
     const p = JSON.parse(raw) as Partial<Persisted>;
     return {
+      theme: p.theme === 'dark' ? 'dark' : 'light',
       region: p.region === 'US' ? 'US' : 'CA',
       saved: Array.isArray(p.saved) ? p.saved : [],
       apiKey: p.apiKey || envKey,
@@ -29,6 +33,8 @@ function load(): Persisted {
 }
 
 interface AppState {
+  theme: Theme;
+  setTheme(t: Theme): void;
   region: Region;
   setRegion(r: Region): void;
   saved: SavedShow[];
@@ -53,11 +59,16 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }
   }, [state]);
 
+  useEffect(() => {
+    document.documentElement.dataset.theme = state.theme;
+  }, [state.theme]);
+
   const source = useMemo<DataSource>(
     () => (state.apiKey.trim() ? new TmdbSource(state.apiKey.trim()) : new DemoSource()),
     [state.apiKey],
   );
 
+  const setTheme = useCallback((theme: Theme) => setState((s) => ({ ...s, theme })), []);
   const setRegion = useCallback((region: Region) => setState((s) => ({ ...s, region })), []);
   const setApiKey = useCallback(
     // Saved shows are tied to a catalogue (demo IDs ≠ TMDB IDs), so switching sources resets them.
@@ -79,6 +90,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AppState>(
     () => ({
+      theme: state.theme,
+      setTheme,
       region: state.region,
       setRegion,
       saved: state.saved,
@@ -89,7 +102,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setApiKey,
       source,
     }),
-    [state, setRegion, toggleSaved, clearSaved, setApiKey, source],
+    [state, setTheme, setRegion, toggleSaved, clearSaved, setApiKey, source],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
