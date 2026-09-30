@@ -15,6 +15,13 @@ Browse TV shows streaming in **Canada or the US**, pick the ones you care about,
 - **Live data (recommended):** add a free [TMDB API key](https://www.themoviedb.org/settings/api) on the Settings page (or set `VITE_TMDB_API_KEY` in `.env.local`). Either the v3 API key or the v4 read-access token works. Streaming availability per country comes from TMDB's watch-provider data (JustWatch); episode dates are TMDB air dates.
 - **Demo mode:** with no key, the app uses a built-in catalogue of *fictional* shows whose schedules are generated relative to today, so everything works offline.
 
+## Publishing
+
+`.github/workflows/deploy.yml` builds the app and publishes it with GitHub Pages on every push.
+One-time setup in the repository: **Settings → Pages → Source: GitHub Actions**
+(on a free GitHub plan the repository must be public for Pages to work).
+The site then lives at `https://<username>.github.io/What-s-On/`.
+
 ## Development
 
 ```bash
